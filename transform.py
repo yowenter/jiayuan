@@ -40,7 +40,19 @@ def saveData(data,path):
 			f.write(' |'.join(s)+'\n')
 
 
+def quantile(array,quantiles):
+	for p,v in enumerate(array):
+		rate=0
+		for i in quantiles:
+			if v>i:
+				rate+=1
+			else:
+				break
+		array[p]=rate
 
+	return array
+
+			
 
 data=loadData(PATH)
 data=transform(data)
