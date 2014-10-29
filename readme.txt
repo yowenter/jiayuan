@@ -1,6 +1,23 @@
-这是一个爬取世纪佳缘网站个人信息的爬虫 .
-jiayuan.py 模拟登录,并下载.
-parse.py   数据清洗
-patent.py  根据关键词下载中国知识产权局网站信息
-ml.py 导入dataframe ,分成训练集,测试集 ,使用svm和决策树sklearn模型 .
+Hi,
+Here are some unordered python files.
+I wrote them for some research on marriage match model. 
+
+
+details:
+
+jiayuan.py,  a spider for http://www.jiayuan.com .
+At first the spider simulate logged in website then fetch the couples' ID on the website.
+Next it download the personal data on his home page.
+
+parse.py , by import BeautifulSoup to parse the webpages.
+
+transform.py, transform data to numeric.
+
+patent.py, It's a programm I wrote for my teacher's research on comptition intelligence analysis.
+
+ml.py, a framework train and test using some machine learning models.
+
+If you're interested in data mining ,maybe we can have a talk. :)
+
+
 
