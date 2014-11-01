@@ -1,7 +1,7 @@
 #-*-encoding:utf-8-*-
-import numpy as np
-import pandas as pd
 
+
+PATH='/home/idanan/jiayuan/user_infos.txt'
 FILTERS=[5]
 def loadData(path):
 	infos=[]
@@ -25,9 +25,10 @@ def departInfo(info,filters):
 def transform(data):
 	new_data=[]
 	for info in data:
-		info1,info2=departInfo(info,FILTERS)
-		new_info=info2+map(mapping,info1)
-		new_data.append(new_info)
+		if info[1]=='女':
+			info1,info2=departInfo(info,FILTERS)
+			new_info=info2+map(mapping,info1)
+			new_data.append(new_info)
 	return new_data
 
 
@@ -50,40 +51,10 @@ def quantile(array,quantiles):
 
 	return array
 
-def calQuantile(array,num):
-	length=len(array)
-	array=sorted(map(lambda x:int(x),array))
-	p=int(length*num)
-	return array[p]
+			
 
-def fourQuant(array):
-	quants=[]
-	for num in [0.25,0.5,0.75]:
-		quants.append(calQuantile(array,num))
-	return quants
+data=loadData(PATH)
+data=transform(data)
+saveData(data,'/home/idanan/test.txt')
 
-def convertQuants(array):
-	quants=fourQuant(array)
-	array=quantile(array,quants)
-	return array
-
-def calBMI(array):
-	for p,v in enumerate(array):
-		if v<18 or 24<v<28:
-			array[p]=0
-		if 18<=v<=24:
-			array[p]=1
-		if v>=28:
-			array[p]=-1
-	return array	
-
-
-
-def main():
-	data=pd.ExcelFile('/home/idanan/jiayuan/female_data.xls').parse('sheet1')
-	data['height']=convertQuants(data['height'])
-	data['weight']=convertQuants(data['weight'])
-	data['bmi']=pd.Series(calBMI(np.array(data['bmi']).astype(int)))
-	data.to_excel('/home/idanan/jiayuan/female_data1.xls',index=False)
-
-main()
+			
