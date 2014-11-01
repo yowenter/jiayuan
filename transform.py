@@ -3,6 +3,7 @@
 
 PATH='/home/idanan/jiayuan/user_infos.txt'
 FILTERS=[5]
+mappy={'中专或相当学历':1,'大专':2,'本科':3,'硕士':4,'双学士':5,'博士':6,'博士后':7,'未填':0}
 def loadData(path):
 	infos=[]
 	with open(path) as f:
