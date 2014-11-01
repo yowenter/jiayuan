@@ -87,7 +87,7 @@ def save_excel(fpath,name,lists):
 		for j in range(width):
 			string=li[j].decode('utf-8')
 			sheet.write(i,j,string)
-			workbook.save(fpath+'/'+name+'.xls')
+	workbook.save(fpath+'/'+name+'.xls')
 
 infos=loadData('/home/idanan/jiayuan/parsed_female_info.txt')
 save_excel('/home/idanan/jiayuan','parsed_female',infos)
