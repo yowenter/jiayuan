@@ -12,13 +12,13 @@ jiayuan.py: a spider for http://www.jiayuan.com .
 parse.py :Extract user information from the retrieved webpages with the library BeautifulSoup4.3.2 .
 
 transform.py: transform the users' data to nummeric ,according to a
-dictionary that our group discussed for a long time ...
+dictionary which costs our group discussed  a long time ...
 
 pdTransform.py: another program for transform data by using the library
 pandas. 
 
 patent.py:  fetch sources from china patent website for  a research on
-comptition intelligence analysis.It's nothing to do with our marriage model
+comptition intelligence analysis. There's nothing to do with our marriage model
 search.
 
 ml.py: using some methods ,such as  SVM,Decision
