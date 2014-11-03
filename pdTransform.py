@@ -7,6 +7,9 @@ Email:airywent@gmail.com
 import pandas as pd
 import numpy as np
 import re
+import xlwt
+
+user_info='d:/repository/jiayuan/user_info.txt'
 
 header=['id','gender','age','where','height','edu',\
 		'marriage','salary','nation','job',\
@@ -31,7 +34,7 @@ mapping={'愿意':'1','不愿意':'-1','视情况而定':'0','暂未购车':'-1'
 	 '光头':'0','很短':'1','短发':'2','中等长度':'3','卷曲长发':'5','顺直长发':'5',\
 	 '淡雅如菊':'1,0','娇小依人':'0,0','眉清目秀':'1,0','明眸善睐':'0,1','成熟魅力':'1,1','青春活泼':'0,0',\
 	 '秀外慧中':'0,1','雍容华贵':'1,1',
-	 '10000～20000元':'2','20000元以上':'3','2000元以下':'-1','2000～5000元':0,'5000～10000元':1}
+	 '10000～20000元':'2','20000元以上':'3','2000元以下':'-1','2000～5000元':'0','5000～10000元':'1'}
 
 
 
@@ -52,27 +55,32 @@ def nummeric(data,columns):
 		if result:
 			return result.group()
 		else:
-			return 0
+			return -1
 	for col in columns:
-		data[col]=data[col].map(search).astype(int)
+		data[col]=data[col].map(search)
 	return data
 
 def quantize(data,columns):
 	for col in columns:
+		data[col]=data[col].astype(int)
 		values=data[col].describe()
 		rates=[values['min'],values['25%'],values['50%'],values['75%'],values['max']]
 		#col_data=data[col] ,slice can't be as column in data !
 		#data[col]=col_data[(np.abs(col_data-mean)<3*std)]
-		col_data=pd.cut(data[col],rates,labels=[-1,0,1,2])
-		data[col]=col_data
-		return data
+		data[col]=pd.cut(data[col],rates,labels=[-1,0,1,2])
+	return data
 
 def calbmi(data):
 	def bmi(w,h):
-		if w!=0 and h!=0:
-			return float(w)/(h*h)
-		else:
-			return 0
+		try:
+			w=int(w)
+			h=int(h)
+			if w!=0 and h!=0:
+				return float(w)/(h*h/10000)
+			else:
+				return -1
+		except:
+			return -1
 	f=lambda x:bmi(x['weight'],x['height'])
 	data['bmi']=data.apply(f,axis=1)
 	return data
@@ -84,20 +92,27 @@ def transform(data,mapping):
 		if x in mapping:
 			return mapping[x]
 		else:
-			return 0
+			return x
 	for col in header:
-		data.loc[:,col].map(xmap)
+		data[col]=data.loc[:,col].map(xmap)
 	return data
 
 
 def saveData(data,fpath):
-	data.to_csv(fpath,sep='|',index=False,header=False)
+	data.to_csv(fpath+'.txt',sep='|',index=False,header=False)
+	data.to_excel(fpath+'.xls',header=True,encoding='utf-8')
+	
+	
+
+	
 pd.set_option('mode.chained_assignment',None)
-data=loadData('/home/idanan/jiayuan/user_info.txt')
+data=loadData(user_info)
 female,male=departData(data)
+female=transform(female,mapping)
 female=nummeric(female,['age','height','weight'])
-saveData(female,'/home/idanan/jiayuan/pd_female.txt')
-#ifemale=calbmi(female)
+female=calbmi(female)
+female=quantize(female,['age','height','weight','bmi'])
+saveData(female,'d:/repository/jiayuan/pd_female')
 
 #female=quantize(female,['height','weight'])
 #saveData(transform(female,mapping),'/home/idanan/jiayuan/transed_female.txt')
