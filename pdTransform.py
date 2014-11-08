@@ -7,8 +7,7 @@ Email:airywent@gmail.com
 import pandas as pd
 import numpy as np
 import re
-import xlwt
-
+from functools import partial
 
 
 header=['id','gender','age','where','height','edu',\
@@ -26,7 +25,7 @@ mapping={'愿意':'1','不愿意':'-1','视情况而定':'0','暂未购车':'-1'
        '住单位房':0,'与人合租':'0','独自租房':'0',\
        '中专或相当学历':'1','大专':'2','本科':'3','双学士':'4','硕士':'5','博士':'6','博士后':'7',\
        '未婚':'0,0','离异,无小孩':'1,0','离异,有小孩归自己':'1,1','离异':'1,1','离异,有小孩归对方':'1,1',\
-       '丧偶,无小孩':'1,0','丧偶,有小孩归自己':'1,1','丧偶,有小孩归对方':'1,1',\
+       '丧偶,无小孩':'1,0','丧偶,有小孩归自己':'1,1','丧偶,有小孩归对方':'1,1','丧偶':'1,0','已婚':'0,0',\
        '苗条':'-1','高挑':'-1','匀称':'0','丰满':'1','健壮':'2','魁梧':'2',\
        '方脸型':'1','国字脸型':'1','菱形脸型':'1','三角脸型':'1','圆脸型':'0','鸭蛋脸型':'0','瓜子脸型':'0','长脸型':'1',\
 	'不吸，很反感吸烟':'3','不吸，但不反感':'1','社交时偶尔吸':'-1','每周吸几次':'-2','每天都吸':'-4','有烟瘾':'-5',\
@@ -41,11 +40,13 @@ def loadDict(fpath):
 	fmap={}
 	with open(fpath) as f:
 		for line in f:
-			s=line.strip().split(' ')
+			s=line.strip()
+			s=re.split('\t| ',s)
+			key=s[0]
 			if len(s)>1:
-				fmap[s[0]]=s[-1]
+				fmap[key]=s[-1]
 			else:
-				fmap[s[0]]='0,0,0'
+				fmap[key]='0,0,0'
 	return fmap
 
 
@@ -103,6 +104,15 @@ def calbmi(data):
 	data['bmi']=data.apply(f,axis=1)
 	return data
 
+def extract(value,number):
+	if value!='NA' and type(value)==str:
+		values=value.split(',')
+		return values[number]
+	else:
+		return 0
+
+
+
 
 #map data to transform from string to nummeric
 def transform(data,mapping):
@@ -120,19 +130,27 @@ def saveData(data,fpath):
 	data.to_csv(fpath+'.txt',sep='|',index=False,header=True)
 	
 	
+def parse():
+	user_info='/home/idanan/jiayuan/user_info.txt'
+	pd.set_option('mode.chained_assignment',None)
+	data=loadData(user_info)
+	female,male=departData(data)
+	female=transform(female,mapping)
+	female=nummeric(female,['age','height','weight'])
+	female=calbmi(female)
+	female=quantize(female,['age','height','weight','bmi'])
+	female=convertWhere(female,'/home/idanan/jiayuan/code/from_dict.txt')
+	female['nation']=female['nation'].map(lambda x:{'汉族':1}.get(x,0))
+	female.drop(labels=['place','personality','weight','job'],axis=1,inplace=True)
+	female['where2']=female['where'].map(partial(extract,number=2))
+	for col in ['where','marriage','look']:
+		for i in range(2):
+			new_col=col+str(i)
+			female[new_col]=female[col].map(partial(extract,number=i))
+	
+	
+	
 
-user_info='/home/idanan/jiayuan/user_info.txt'
-pd.set_option('mode.chained_assignment',None)
-data=loadData(user_info)
-female,male=departData(data)
-female=transform(female,mapping)
-female=nummeric(female,['age','height','weight'])
-female=calbmi(female)
-female=quantize(female,['age','height','weight','bmi'])
-female=convertWhere(female,'/home/idanan/jiayuan/code/from_dict.txt')
-female['nation']=female['nation'].map(lambda x:{'汉族':1}.get(x,0))
-female.drop(labels=['place','personality','weight'],axis=1,inplace=True)
-saveData(female,'/home/idanan/jiayuan/code/pd_female')
+	saveData(female,'/home/idanan/jiayuan/code/pd_female1')
 
-#female=quantize(female,['height','weight'])
-#saveData(transform(female,mapping),'/home/idanan/jiayuan/transed_female.txt')
+parse()

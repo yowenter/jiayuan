@@ -1,3 +1,4 @@
+id|gender|age|where|height|edu|marriage|salary|nation|job|car|house|look|body|face|hair|smoke|drink|child|parent|bmi
 10455793|M|0.0|0,0,0|-1.0|3|0,0|-1|1|教育/培训|NA|NA|NA|NA|0|5|3|1|1|1|0.0
 18423331|M|-1.0|0,0,0|0.0|1|0,0|0|1|财会/审计/统计|-1|0|1,0|-1|NA|5|1|0|1|1|-1.0
 3267962|M|-1.0|0,0,0|1.0|3|0,0|-1|1|在校学生|-1|0|NA|-1|0|5|1|0|1|0|0.0
