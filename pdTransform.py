@@ -18,7 +18,7 @@ def loadMapping(fpath):
 	return mapping
 
 
-def loadData(fpath):
+def loadData(fpath,header):
 	data=pd.read_csv(fpath,names=header,sep='|')
 	return data
 
@@ -107,11 +107,11 @@ def transform(data,mapping):
 
 
 def saveData(data,fpath):
-	data.to_csv(fpath+'.txt',sep='|',index=False,header=True)
+	data.to_csv(fpath,sep='|',index=False,header=True)
 	
 	
 def parse():
-	data=loadData(user_info)
+	data=loadData(user_info,header)
 	female,male=departData(data)
 	female=transform(female,mapping)
 	female=nummeric(female,['age','height','weight'])
@@ -127,18 +127,17 @@ def parse():
 			female[new_col]=female[col].map(partial(extract,number=i))
 	female.drop(labels=['where','marriage','look'],axis=1,inplace=True)
 	female.replace('NA',0,inplace=True)
-	saveData(female,'/home/idanan/jiayuan/code/pd_female1')
+	saveData(female,'/home/idanan/jiayuan/code/pd_female1.txt')
 
 
-if __name__=='__main__':
-	pd.set_option('mode.chained_assignment',None)
-	header=['id','gender','age','where','height','edu',\
-			'marriage','salary','nation','job',\
-	                'car','house','look','body','face',\
-	                'hair','weight','place','smoke','drink',\
-	                'personality','child','parent']
-	user_info='/home/idanan/jiayuan/user_info.txt'
-	mapping=loadMapping('/home/idanan/jiayuan/code/mapping.txt')
-	parse()
-
+#pd.set_option('mode.chained_assignment',None)
+#header=['id','gender','age','where','height','edu',\
+#		'marriage','salary','nation','job',\
+#                'car','house','look','body','face',\
+#                'hair','weight','place','smoke','drink',\
+#                'personality','child','parent']
+#user_info='/home/idanan/jiayuan/user_info.txt'
+#mapping=loadMapping('/home/idanan/jiayuan/code/mapping.txt')
+#parse()
+#
 	

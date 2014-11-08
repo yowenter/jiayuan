@@ -1,7 +1,5 @@
 #-*-encoding:utf-8-*-
-import xlwt
 import re
-import pandas as pd
 
 PATH='/home/idanan/jiayuan/user_infos.txt'
 header=['id','gender','age','where','height','edu',\
@@ -14,7 +12,7 @@ MAPPY={'愿意':'1','不愿意':'-1','视情况而定':'0','暂未购车':'-1','
 		'住单位房':0,'与人合租':'0','独自租房':'0',\
 		'中专或相当学历':'1','大专':'2','本科':'3','双学士':'4','硕士':'5','博士':'6','博士后':'7',\
 		'未婚':'0,0','离异,无小孩':'1,0','离异,有小孩归自己':'1,1','离异':'1,1','离异,有小孩归对方':'1,1',\
-		'丧偶,无小孩':'1,0','丧偶,有小孩归自己':'1,1','丧偶,有小孩归对方':'1,1',\
+		'丧偶,无小孩':'1,0','丧偶,有小孩归自己':'1,1','丧偶,有小孩归对方':'1,1','丧偶':'-1,0',\
 		'苗条':'-1','高挑':'-1','匀称':'0','丰满':'1','健壮':'2','魁梧':'2',\
 		'方脸型':'1','国字脸型':'1','菱形脸型':'1','三角脸型':'1','圆脸型':'0','鸭蛋脸型':'0','瓜子脸型':'0',\
 		'不吸，很反感吸烟':'3','不吸，但不反感':'1','社交时偶尔吸':'-1','每周吸几次':'-2','每天都吸':'-4','有烟瘾':'-5',\
@@ -72,6 +70,7 @@ def transform(data,mappy):
 
 def saveData(data,path):
 	with open(path,'w') as f:
+		f.write('|'.join(header)+'\n')
 		for line in data:
 			s=[str(i) for i in line]
 			f.write('|'.join(s)+'\n')
@@ -90,11 +89,14 @@ def nummeric(data,columns):
 			data[i][j]=search(row[j])
 	return data
 
-def addColumn(data,columns):
+def addColumn(data,columns,dims=2):
 	for i,row in enumerate(data):
 		for j in columns:
 			if row[j]=='NA':
-				data[i][j]='NA|NA'
+				if dims=2:
+					data[i][j]='NA|NA'
+				if dims=3:
+					data[i][j]='NA|NA|NA'
 			else:
 				data[i][j]=re.sub(',','|',row[j])
 	return data
@@ -110,6 +112,40 @@ def quantile(array,quantiles):
 				break
 		array[p]=rate
 	return array
+
+
+def descCol(data,column):
+	col=[]
+	for row in data:
+		col.append(row[column])
+	col=filter(lambda x:x!='NA',col)
+	values=pd.DataFrame(col).astype(int).describe()
+	bins=[values['min'],values['25%'],values['50%'],values['75%'],values['max']]
+	return bins
+
+def calBMI(x,y):
+	if x!='NA' and y!='NA':
+		if int(x)!=0 and int(y)!=0:
+			t=float(y)*int(y)/10000
+			return int(x)/t
+		else:
+			return 0
+	else:
+		return 0
+
+def appendBMI(data):
+	for row in data:
+		bmi=calBMI(row[16],row[4])
+		row.append(bmi)
+	return data
+
+def test(fpath,width):
+	with open(fpath,'r') as f:
+		for line in f:
+			length=len(line.strip().split('|'))
+			if width!=length:
+				print length,line
+
 def save_excel(fpath,name,lists):
 	workbook=xlwt.Workbook()
         sheet=workbook.add_sheet(name)
@@ -130,5 +166,13 @@ def apply(fpath,dpath,func,args):
 #female=transform(female,MAPPY)
 #saveData(female,'/home/idanan/jiayuan/transed_female.txt')
 
-#data=loadData('/home/idanan/jiayuan/result_female.txt')
-#save_excel('/home/idanan/jiayuan','result_female',data)
+#data=loadData('/home/idanan/jiayuan/transed_female.txt')
+#data=addColumn(data,[6,18])
+#data=loadData('/home/idanan/jiayuan/transed_female.txt')
+#data=appendBMI(data)
+#data=loadData('/home/idanan/jiayuan/parsed_female2.txt')
+#data=addColumn(data,[6,12])
+#saveData(data,'/home/idanan/jiayuan/parsed_female3.txt')
+#
+
+#test('/home/idanan/jiayuan/parsed_female3.txt',26)
