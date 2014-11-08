@@ -1,3 +1,4 @@
+id|gender|age|height|edu|salary|nation|car|house|body|face|hair|smoke|drink|child|parent|bmi|where2|where0|where1|marriage0|marriage1|look0|look1
 10455793|M|31|160|3|-1|1|0|0|0|0|5|3|1|1|1|22.5|1|0|0|0|0|0|0
 18423331|M|27|162|1|0|1|-1|0|-1|0|5|1|0|1|1|-1.0|3|0|0|0|0|1|0
 3267962|M|26|165|3|-1|1|-1|0|-1|0|5|1|0|1|0|24.0|3|0|-1|0|0|0|0
