@@ -9,45 +9,13 @@ import numpy as np
 import re
 from functools import partial
 
-
-header=['id','gender','age','where','height','edu',\
-		'marriage','salary','nation','job',\
-                'car','house','look','body','face',\
-                'hair','weight','place','smoke','drink',\
-                'personality','child','parent']
-
-
-
-#The string in text is decoded as utf-8,while the string in shell need to be decode to utf-8
-
-mapping={'愿意':'1','不愿意':'-1','视情况而定':'0','暂未购车':'-1','已经购车':'1',\
-	'已购住房':'1','暂未购房':'0','需要时购置':'0','与父母同住':'0','住亲朋家':'0','住单位家':'0',\
-       '住单位房':0,'与人合租':'0','独自租房':'0',\
-       '中专或相当学历':'1','大专':'2','本科':'3','双学士':'4','硕士':'5','博士':'6','博士后':'7',\
-       '未婚':'0,0','离异,无小孩':'1,0','离异,有小孩归自己':'1,1','离异':'1,1','离异,有小孩归对方':'1,1',\
-       '丧偶,无小孩':'1,0','丧偶,有小孩归自己':'1,1','丧偶,有小孩归对方':'1,1','丧偶':'1,0','已婚':'0,0',\
-       '苗条':'-1','高挑':'-1','匀称':'0','丰满':'1','健壮':'2','魁梧':'2',\
-       '方脸型':'1','国字脸型':'1','菱形脸型':'1','三角脸型':'1','圆脸型':'0','鸭蛋脸型':'0','瓜子脸型':'0','长脸型':'1',\
-	'不吸，很反感吸烟':'3','不吸，但不反感':'1','社交时偶尔吸':'-1','每周吸几次':'-2','每天都吸':'-4','有烟瘾':'-5',\
-	'社交需要时喝':'0','有兴致时喝':'-1','每天都离不开酒':'-4','不喝':'1',\
-	 '光头':'0','很短':'1','短发':'2','中等长度':'3','卷曲长发':'5','顺直长发':'5',\
-	 '淡雅如菊':'1,0','娇小依人':'0,0','眉清目秀':'1,0','明眸善睐':'0,1','成熟魅力':'1,1','青春活泼':'0,0',\
-	 '秀外慧中':'0,1','雍容华贵':'1,1','女':'M','未填':'NA','保密':'NA',
-	 '10000～20000元':'2','20000元以上':'3','2000元以下':'-1','2000～5000元':'0','5000～10000元':'1'}
-
-
-def loadDict(fpath):
-	fmap={}
+def loadMapping(fpath):
+	mapping={}
 	with open(fpath) as f:
 		for line in f:
-			s=line.strip()
-			s=re.split('\t| ',s)
-			key=s[0]
-			if len(s)>1:
-				fmap[key]=s[-1]
-			else:
-				fmap[key]='0,0,0'
-	return fmap
+			key,value=line.strip().split(':')
+			mapping[key]=value
+	return mapping
 
 
 def loadData(fpath):
@@ -67,12 +35,24 @@ def nummeric(data,columns):
 		if result:
 			return result.group()
 		else:
-			return -1
+			return 0 
 	for col in columns:
 		data[col]=data[col].map(search)
 	return data
 
 def convertWhere(data,fpath):
+	def loadDict(fpath):
+		fmap={}
+		with open(fpath) as f:
+			for line in f:
+				s=line.strip()
+				s=re.split('\t| ',s)
+				key=s[0]
+				if len(s)>1:
+					fmap[key]=s[-1]
+				else:
+					fmap[key]='0,0,0'
+		return fmap
 	fmap=loadDict(fpath)
 	def imap(x):
 		return fmap.get(x,'0,0,0')
@@ -131,14 +111,12 @@ def saveData(data,fpath):
 	
 	
 def parse():
-	user_info='/home/idanan/jiayuan/user_info.txt'
-	pd.set_option('mode.chained_assignment',None)
 	data=loadData(user_info)
 	female,male=departData(data)
 	female=transform(female,mapping)
 	female=nummeric(female,['age','height','weight'])
 	female=calbmi(female)
-	female=quantize(female,['age','height','weight','bmi'])
+	#female=quantize(female,['age','height','weight','bmi'])
 	female=convertWhere(female,'/home/idanan/jiayuan/code/from_dict.txt')
 	female['nation']=female['nation'].map(lambda x:{'汉族':1}.get(x,0))
 	female.drop(labels=['place','personality','weight','job'],axis=1,inplace=True)
@@ -147,10 +125,20 @@ def parse():
 		for i in range(2):
 			new_col=col+str(i)
 			female[new_col]=female[col].map(partial(extract,number=i))
-	
-	
-	
-
+	female.drop(labels=['where','marriage','look'],axis=1,inplace=True)
+	female.replace('NA',0,inplace=True)
 	saveData(female,'/home/idanan/jiayuan/code/pd_female1')
 
-parse()
+
+if __name__=='__main__':
+	pd.set_option('mode.chained_assignment',None)
+	header=['id','gender','age','where','height','edu',\
+			'marriage','salary','nation','job',\
+	                'car','house','look','body','face',\
+	                'hair','weight','place','smoke','drink',\
+	                'personality','child','parent']
+	user_info='/home/idanan/jiayuan/user_info.txt'
+	mapping=loadMapping('/home/idanan/jiayuan/code/mapping.txt')
+	parse()
+
+	
