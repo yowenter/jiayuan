@@ -1,4 +1,5 @@
 #-*-encoding:utf-8 -*-
+import re
 import numpy as np
 import pandas as pd
 from pdTransform import saveData
@@ -6,7 +7,8 @@ from sklearn import metrics
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA,FactorAnalysis
 from sklearn.preprocessing import scale
-import re
+from sklearn.tree import DecisionTreeClassifier as DecisionClassifier
+from functools import partial
 
 def matchDict(fpath):
 	matches={}
@@ -14,15 +16,42 @@ def matchDict(fpath):
 		for line in f:
 			li=line.strip().split(' ')
 			if len(li)==3:
-				matches[li[1]]=li[2]
-			else:
-				maches[li[1]]=0
+				matches[int(li[1])]=int(li[2])
+			if len(li)==2:
+				matches[int(li[1])]=0
 	return matches
 
-def concatData(female,male,matches):
-	female['id']=female['id'].map(matches)
+def match(x,matches):
+	return matches.get(int(x),0)
+
+def departData(dataSet,rate):
+	trainLen=int(len(dataSet)*rate)
+	trainData=dataSet[:trainLen]
+	testData=dataSet[trainLen+1:]
+	return trainData,testData
+
+
+def concatData(female,male):
 	data=pd.merge(male,female,on='id')
 	return data
+
+def scaleData(data,filters):
+	new_data=data.drop(labels=filters,axis=1)
+	new_data=new_data.fillna(0).astype(float).values
+	new_data[:,:-1]=scale(new_data[:,:-1])
+	return new_data
+
+def test(classifier,testData):
+	X=testData[:,:-1]
+	Y=testData[:,-1]
+	error=0.0
+	for x,y in zip(X,Y):
+		result=classifier.predict(x)
+		if np.abs(result[0]-y)>=0.5:
+			error+=1
+	error_rate=error/len(Y)
+	return error_rate
+
 
 def factors(data,components,method='pca'):
 	if method=='pca':
@@ -30,12 +59,6 @@ def factors(data,components,method='pca'):
 	if method=='factor':
 		pca=FactorAnalysis(n_components=components,svd_method='randomized').fit(data)	
 	return pca
-
-def scaleData(data,filters):
-	new_data=data.drop(labels=filters,axis=1)
-	new_data=new_data.fillna(0).astype(float).values
-	new_data=scale(new_data)
-	return new_data
 
 def kmeansModel(data,n_digits,initValue='k-means++'):
 	def bench_k_means(estimator,data):
@@ -46,19 +69,45 @@ def kmeansModel(data,n_digits,initValue='k-means++'):
 
 
 def decisionModel(data):
-	pass
+	X=data[:,:-1]
+	Y=data[:,-1]
+	classifier=DecisionClassifier()
+	classifier=classifier.fit(X,Y)
+	return classifier
 
 
 def main():
 	header=re.sub(' |\t','','id|gender|age|height|edu|salary|nation|car|house|body|face|hair|\
-	smoke|drink|child|parent|bmi|where2|where0|where1|\
-	marriage0|marriage1|look0|look1').split('|')
-	data=pd.read_csv('/home/idanan/jiayuan/code/pd_female1.txt',names=header,sep='|')
+	smoke|drink|child|parent|bmi|where0|where1|\
+	marriage0|marriage1|look0|look1|where2').split('|')
+	data=pd.read_csv('/home/idanan/jiayuan/code/resources/transed_F.txt',names=header,sep='|')
 	new_data=scaleData(data,['id','gender'])
 	pca=factors(new_data,18)
 	print 'PCA explained variance:', sum(pca.explained_variance_ratio_)
 	new_data=pca.transform(new_data)
 	results=kmeansModel(new_data,6)
 	data['cluster']=results
-	saveData(data,'/home/idanan/jiayuan/code/cluster_female2.txt')
+	saveData(data,'/home/idanan/jiayuan/code/resources/cluster_female.txt')
+def mainTree():
+	header=re.sub(' |\t','','id|gender|age|height|edu|salary|nation|car|house|body|face|hair|\
+	smoke|drink|child|parent|bmi|where0|where1|\
+	marriage0|marriage1|look0|look1|where2').split('|')
+	MaleData=pd.read_csv('/home/idanan/jiayuan/code/resources/transed_M.txt',names=header,sep='|')
+	FemaleData=pd.read_csv('/home/idanan/jiayuan/code/resources/cluster_female.txt',names=header+['class'],sep='|')
+	matches=matchDict('/home/idanan/jiayuan/code/resources/lovers_ids.txt')
+	FemaleData['id']=FemaleData['id'].map(partial(match,matches=matches))
+	FemaleClass=FemaleData[['id','class']]
+	newMaleData=concatData(MaleData,FemaleClass)
+	MaleArrays=scaleData(newMaleData,['id','gender'])
+	
+	trainData,testData=departData(MaleArrays,0.95)
+	trainModel=decisionModel(trainData)
+	error=test(trainModel,testData)
+	print 'Decision Model error:',error
 
+mainTree()
+
+
+
+
+	
