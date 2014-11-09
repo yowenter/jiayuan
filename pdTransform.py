@@ -110,34 +110,37 @@ def saveData(data,fpath):
 	data.to_csv(fpath,sep='|',index=False,header=True)
 	
 	
-def parse():
+def parse(gender):
 	data=loadData(user_info,header)
 	female,male=departData(data)
-	female=transform(female,mapping)
-	female=nummeric(female,['age','height','weight'])
-	female=calbmi(female)
-	#female=quantize(female,['age','height','weight','bmi'])
-	female=convertWhere(female,'/home/idanan/jiayuan/code/from_dict.txt')
-	female['nation']=female['nation'].map(lambda x:{'汉族':1}.get(x,0))
-	female.drop(labels=['place','personality','weight','job'],axis=1,inplace=True)
-	female['where2']=female['where'].map(partial(extract,number=2))
+	if gender=='F':
+		data=female
+	if gender=='M':
+		data=male
+
+	data=transform(data,mapping)
+	data=nummeric(data,['age','height','weight'])
+	data=calbmi(data)
+	data=convertWhere(data,'/home/idanan/jiayuan/code/from_dict.txt')
+	data['nation']=data['nation'].map(lambda x:{'汉族':1}.get(x,0))
+	data.drop(labels=['place','personality','weight','job'],axis=1,inplace=True)
 	for col in ['where','marriage','look']:
 		for i in range(2):
 			new_col=col+str(i)
-			female[new_col]=female[col].map(partial(extract,number=i))
-	female.drop(labels=['where','marriage','look'],axis=1,inplace=True)
-	female.replace('NA',0,inplace=True)
-	saveData(female,'/home/idanan/jiayuan/code/pd_female1.txt')
-
-
+			data[new_col]=data[col].map(partial(extract,number=i))
+	data['where2']=data['where'].map(partial(extract,number=2))
+	data.drop(labels=['where','marriage','look'],axis=1,inplace=True)
+	data.replace('NA',0,inplace=True)
+	saveData(data,'/home/idanan/jiayuan/code/transed_{0}.txt'.format(gender))
+	
 #pd.set_option('mode.chained_assignment',None)
-header=['id','gender','age','where','height','edu',\
-		'marriage','salary','nation','job',\
-                'car','house','look','body','face',\
-                'hair','weight','place','smoke','drink',\
-                'personality','child','parent']
+#header=['id','gender','age','where','height','edu',\
+#		'marriage','salary','nation','job',\
+#                'car','house','look','body','face',\
+#                'hair','weight','place','smoke','drink',\
+#                'personality','child','parent']
 #user_info='/home/idanan/jiayuan/user_info.txt'
-#mapping=loadMapping('/home/idanan/jiayuan/code/mapping.txt')
-#parse()
+#mapping=loadMapping('/home/idanan/jiayuan/code/femaleMapping.txt')
+#parse('F')
 #
 	
