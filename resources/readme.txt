@@ -1,5 +1,6 @@
-Hi,
-I wrote them for some research on marriage match model. 
+Ttitle: Marriage model research .
+Group Member: Jawen,Swimmi,Czo,Wenter .
+
 
 
 details:
@@ -17,15 +18,12 @@ dictionary which costs our group discussed  a long time ...
 pdTransform.py: another program for transform data by using the library
 pandas. 
 
-patent.py:  fetch sources from china patent website for  a research on
-comptition intelligence analysis. There's nothing to do with our marriage model
-search.
-
-ml.py: using some methods ,such as  SVM,Decision
-Trees,then generate a model that predict if a enterprise were to go bankrupt.
-
-
-If you're interested in data mining ,maybe we can have a talk. :)
+marriageModel.py: Reduce dimisions by PCA,Factor Analysis .Then fit data to KMeans Model and DecisionTree Model.
 
 
 
+
+
+'''Author:Wenter.Woo
+Email:airywent@gmail.com
+Org:ECNU '''
