@@ -9,6 +9,10 @@ from sklearn.decomposition import PCA,FactorAnalysis
 from sklearn.preprocessing import scale
 from sklearn.tree import DecisionTreeClassifier as DecisionClassifier
 from functools import partial
+from sklearn.externals.six import StringIO
+import pydot
+from sklearn import tree
+
 
 def matchDict(fpath):
 	matches={}
@@ -44,13 +48,13 @@ def scaleData(data,filters):
 def test(classifier,testData):
 	X=testData[:,:-1]
 	Y=testData[:,-1]
-	error=0.0
+	t=0.0
 	for x,y in zip(X,Y):
 		result=classifier.predict(x)
-		if np.abs(result[0]-y)>=0.5:
-			error+=1
-	error_rate=error/len(Y)
-	return error_rate
+		if np.abs(result[0]-y)<0.5:
+			t+=1
+	true_rate=t/len(Y)
+	return true_rate
 
 
 def factors(data,components,method='pca'):
@@ -88,6 +92,7 @@ def main():
 	results=kmeansModel(new_data,6)
 	data['cluster']=results
 	saveData(data,'/home/idanan/jiayuan/code/resources/cluster_female.txt')
+
 def mainTree():
 	header=re.sub(' |\t','','id|gender|age|height|edu|salary|nation|car|house|body|face|hair|\
 	smoke|drink|child|parent|bmi|where0|where1|\
@@ -99,11 +104,23 @@ def mainTree():
 	FemaleClass=FemaleData[['id','class']]
 	newMaleData=concatData(MaleData,FemaleClass)
 	MaleArrays=scaleData(newMaleData,['id','gender'])
-	
-	trainData,testData=departData(MaleArrays,0.95)
+	pca=factors(MaleArrays[:,:-1],17)
+	print 'PCA explained variance:', sum(pca.explained_variance_ratio_)
+	pcaMaleArray=pca.transform(MaleArrays[:,:-1])
+	MaleArrays=np.c_[pcaMaleArray,MaleArrays]
+
+
+	trainData,testData=departData(MaleArrays,0.9)
 	trainModel=decisionModel(trainData)
-	error=test(trainModel,testData)
-	print 'Decision Model error:',error
+
+	dot_data = StringIO()
+	tree.export_graphviz(trainModel, out_file=dot_data)
+	graph = pydot.graph_from_dot_data(dot_data.getvalue())
+	graph.write_pdf("/home/idanan/jiayuan/code/resources/marriage.pdf") 
+	
+
+	rate=test(trainModel,testData)
+	print 'Decision Model true rate',rate
 
 mainTree()
 
