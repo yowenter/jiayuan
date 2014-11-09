@@ -131,11 +131,11 @@ def parse():
 
 
 #pd.set_option('mode.chained_assignment',None)
-#header=['id','gender','age','where','height','edu',\
-#		'marriage','salary','nation','job',\
-#                'car','house','look','body','face',\
-#                'hair','weight','place','smoke','drink',\
-#                'personality','child','parent']
+header=['id','gender','age','where','height','edu',\
+		'marriage','salary','nation','job',\
+                'car','house','look','body','face',\
+                'hair','weight','place','smoke','drink',\
+                'personality','child','parent']
 #user_info='/home/idanan/jiayuan/user_info.txt'
 #mapping=loadMapping('/home/idanan/jiayuan/code/mapping.txt')
 #parse()
