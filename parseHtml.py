@@ -151,4 +151,4 @@ def multi_extract(folder,function):
 	files=os.listdir(folder)
 	multi_threads(function,files)
 
-extract_infos(os.listdir(USER_INFOS))
+#extract_infos(os.listdir(USER_INFOS))
