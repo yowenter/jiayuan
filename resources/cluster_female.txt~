@@ -1,3 +1,4 @@
+id|gender|age|height|edu|salary|car|house|body|hair|smoke|drink|child|bmi|where0|where1|marriage0|marriage1|where2|cluster
 10455793|F|0.0|-1.0|3|-1.0|0|0|0.0|5|3|1|1|0.0|0|0|0|0|1|4
 18423331|F|-1.0|0.0|1|0.0|-1|0|-1.0|5|1|0|1||0|0|0|0|3|3
 3267962|F|-1.0|1.0|3|-1.0|-1|0|-1.0|5|1|0|1|0.0|0|-1|0|0|3|1
